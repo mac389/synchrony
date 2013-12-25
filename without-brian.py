@@ -19,6 +19,19 @@ v[:,0] = np.random.random_sample(size=N)
 M[:,:,0] = 0.1*(2*np.random.random_sample(size=(N,N))-1)
 W[:,:,0] = np.random.random_sample(size=(N,N)) #Assume same number of inputs for now
 r = np.random.random_sample(size=r.shape)
+u = np.random.random_sample(size=u.shape)
+
+'''
+	TODO: 
+		1. show recall like figure in text, perhaps stealing from frontiers.py. 
+		This entails initially structuring M and exploring the sensitvity of 
+		recall to changes in M. 
+
+		2. different combinations of r and u. What should Quu and Qru be in 
+		addictive states 
+'''
+
+
 xcorr = lambda data: np.outer(data,data)
 
 epsilon = 0.01 #ratio of tau to timestep
@@ -30,9 +43,8 @@ for t in range(1,duration):
 	Qvu[:,:,t] = np.outer(r[:,t-1],u[:,t-1])
 
 	v[:,t] = -v[:,t-1] + epsilon*(v[:,t-1] + M[:,:,t].dot(v[:,t-1]) )
-	M[:,:,t] = M[:,:,t-1] + epsilon/10.*(np.eye(N)-M[:,:,t-1] - np.outer(W[:,:,0].dot(u[:,t]),v[:,t]))
+	M[:,:,t] = M[:,:,t-1] + epsilon/10.*(np.eye(N)-M[:,:,t-1] - np.outer(W[:,:,t-1].dot(u[:,t]),v[:,t]))
 	W[:,:,t] = W[:,:,t-1] + epsilon/100.*(K.dot(W[:,:,t-1]).dot(Quu[:,:,t-1]).dot(Qru[:,:,t-1]-Qvu[:,:,t-1]))
-
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
