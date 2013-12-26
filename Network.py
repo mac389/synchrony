@@ -17,15 +17,25 @@ class Network(object): #later make this inherit brian classes
 		self.duration = duration
 		self.mixing_fraction = mixing_fraction
 
-		self.initialize(ru_params = ru_params)
-		self.run()
-		self.save(downsample = downsampling)
-
-	def initialize(self, ru_params):
+		self.mixing_fraction = mixing_fraction if mixing_fraction is np.ndarray or list else list(mixing_fraction)
+		
+		self.basename = self.timestamp()
 
 		self.memories = cPickle.load(open(memories,READ)) if memories \
-											else np.random.random_integers(0,high=1,size=(self.N['neurons'],self.N['memories']))
+					else np.random.random_integers(0,high=1,size=(self.N['neurons'],self.N['memories']))
 		
+		for fraction in self.mixing_fraction:
+			self.initialize(ru_params = ru_correl_matrix, mixing_fraction = fraction)
+			self.run()
+			self.save(downsample = downsampling, suffix = str(int(fraction*10)), basename = self.basename)
+
+	#Everything belongs to self, don't need to pass so many arguments!
+
+	def initialize(self, ru_params, mixing_fraction):
+	
+		#**kwargs will clean this up
+		#These functions are getting spaghetti-like
+
 		self.v = np.zeros((self.N['neurons'],self.duration),dtype=np.float16)
 		self.u = np.zeros_like(self.v,dtype=np.float16)
 		self.r = np.zeros_like(self.v,dtype=np.float16)
@@ -35,9 +45,9 @@ class Network(object): #later make this inherit brian classes
 
 		self.Quu = np.zeros((self.N['neurons'],self.N['neurons'],self.duration),dtype=np.float16)
 		self.Qru = np.zeros_like(self.Quu,dtype=np.float16)
-		self.Qvu = np.zeros_like(self.Quu,dtype=np.float16)s
+		self.Qvu = np.zeros_like(self.Quu,dtype=np.float16)
 
-		arrs = np.random.multivariate_normal(ru_params['mean'],ru_params['covariance'],
+		arrs = np.random.multivariate_normal(ru_params['means'],ru_params['covariances'],
 			size=(self.N['neurons'],self.duration)).astype(np.float16)
 
 		r = arrs[:,:,0]
@@ -47,8 +57,8 @@ class Network(object): #later make this inherit brian classes
 								memory-0.5*np.ones_like(memory))
 					for memory in self.memories.T]) - 2/float(self.N['memories'])
 
-		self.v[:,0] = (1-self.mixing_fraction)*self.memories[:,0] +\
-							 self.mixing_fraction*(np.random.random_integers(0,high=1,size=(self.N['neurons'],)))
+		self.v[:,0] = (1-mixing_fraction)*self.memories[:,0] +\
+							 mixing_fraction*(np.random.random_integers(0,high=1,size=(self.N['neurons'],)))
 
 		self.W[:,:,0] = np.random.random_sample(size=(self.N['neurons'],self.N['neurons'])) #Assume same number of inputs for now
 		self.r = np.random.random_sample(size=self.r.shape)
@@ -76,18 +86,18 @@ class Network(object): #later make this inherit brian classes
 	def timestamp(self):
 		return datetime.fromtimestamp(time()).strftime('%Y-%m-%d-%H-%M-%S')
 
-	def save(self,downsample=10, prefix='../synchrony-data'):
+	def save(self,downsample=10, prefix='/Volumes/My Book/synchrony-data',suffix='',basename=None):
 
 		self.results = {'v':self.v[:,::downsample],'M':self.M[:,:,::(downsample*10)],'W':self.W[:,:,::(downsample*10)],
 						'Qru':self.Qru[:,:,::downsample],'Quu':self.Quu[:,:,::downsample],'Qvu':self.Qvu[:,:,::downsample],
 						'r':self.r[:,::downsample],'u':self.u[:,::downsample],'memories':self.memories}
 
-		self.basedir= os.path.join(prefix,self.timestamp())
+		self.basedir= os.path.join(prefix,basename if basename else self.timestamp())
 
 		if not os.path.isdir(self.basedir):
 			os.makedirs(self.basedir)
 
-		self.writename = os.path.join(self.basedir,'results.pkl')
+		self.writename = os.path.join(self.basedir,'results-%s.pkl'%(suffix))
 
 		with open(self.writename,WRITE) as f:
 			cPickle.dump(self.results,f)
