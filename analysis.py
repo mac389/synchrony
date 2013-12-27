@@ -16,13 +16,19 @@ def accuracy_figure(data,**kwargs):
 
 	target_memory = data['memories'][:,0] #Assume targeting 0th memory
 
-	accuracy = accuracy_trace(voltage, target_memory)
+	print '------'
+	print start, start.dot(target_memory)
+	print stop
+	print target_memory
+	print 'zsdxfcvhbjnkmxdfszfxdchvjbknvcgdfgvbhjn'
 
+	accuracy = accuracy_trace(voltage, target_memory)
+	print accuracy[:15]
 	visualization.accuracy_plot(start,accuracy,stop,target_memory,**kwargs)
 
 def accuracy_trace(voltage,target):
-	return np.array([np.dot(timestep,target)/(np.linalg.norm(target)*np.linalg.norm(timestep))
-		for timestep in voltage.transpose()])
+
+	return voltage.transpose().dot(target)/float(voltage.shape[0])
 
 dq = lambda data: abs(np.diff(map(abs,map(np.linalg.det,np.rollaxis(data.astype(np.float32),2)))))
 
