@@ -1,4 +1,4 @@
-import os, cPickle, random
+import os, cPickle, random, itertools
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -29,7 +29,7 @@ class Network(object): #later make this inherit brian classes
 		for fraction in self.mixing_fraction:
 			self.initialize(ru_params = ru_correl_matrix, mixing_fraction = fraction)
 			self.run()
-			self.quick_view()
+			#self.quick_view()
 			self.save(downsample = downsampling, suffix = str(int(fraction*10)), basename = self.basename)
 
 	#Everything belongs to self, don't need to pass so many arguments!
@@ -43,7 +43,7 @@ class Network(object): #later make this inherit brian classes
 		return answer
 
 	def Fs(self,scalar):
-		return 1 if scalar >= 0 else -1
+		return -scalar if random.random() < 1/(1+np.exp(-scalar)) else scalar
 
 	def initialize(self, ru_params, mixing_fraction):
 	
@@ -67,9 +67,9 @@ class Network(object): #later make this inherit brian classes
 		#r = arrs[:,:,0]
 		#u = arrs[:,:,1]
 
-		self.M[:,:,0] = 4/float(self.N['memories'])*sum([np.outer(memory-0.5*np.ones_like(memory),
-								memory-0.5*np.ones_like(memory))
-					for memory in self.memories.T]) - 2/float(self.N['memories'])
+
+		self.M[:,:,0] = np.array([np.outer(one,one) for one in self.memories.T]).sum(axis=0)
+		self.M[:,:,0][np.diag_indices(self.N['neurons'])] = 0
 
 		self.v[:,0] = self.F((1-mixing_fraction)*self.memories[:,0] +\
 							 mixing_fraction*(2*(np.random.random_integers(0,high=1,size=(self.N['neurons'],)))-1))
@@ -77,8 +77,8 @@ class Network(object): #later make this inherit brian classes
 		self.W[:,:,0] = np.random.random_sample(size=(self.N['neurons'],self.N['neurons'])) #Assume same number of inputs for now
 
 
-		self.u[:,400:600] = np.tile(self.memories[:,0],(200,1)).transpose()
-		self.r[:,400:600] = np.ones((self.N['neurons'],200))
+		#self.u[:,400:600] = np.tile(self.memories[:,0],(200,1)).transpose()
+		#self.r[:,400:600] = np.ones((self.N['neurons'],200))
 
 		self.I = np.eye(self.N['neurons'])
 
@@ -95,7 +95,12 @@ class Network(object): #later make this inherit brian classes
 			self.Qvu[:,:,t] = np.outer(self.r[:,t-1],self.u[:,t-1])
 
 			self.v[:,t] = self.v[:,t-1]
-			self.v[idx,t] = self.Fs(self.M[idx,:,t].dot(self.v[:,t]))
+			self.M[:,:,t] = self.M[:,:,t-1]
+
+			I = self.M[idx,:,t].dot(self.v[:,t])
+
+			self.v[idx,t] =  1 if I >=0 else -1
+
 			self.M[:,:,t] = self.M[:,:,t-1] + self.epsilon/10*(self.I-self.M[:,:,t-1] - np.outer(self.W[:,:,t-1].dot(self.u[:,t]),self.v[:,t]))
 			self.W[:,:,t] = self.W[:,:,t-1] + self.epsilon/100.*(self.K.dot(self.W[:,:,t-1]).dot(self.Quu[:,:,t-1]).dot(self.Qru[:,:,t-1]-self.Qvu[:,:,t-1]))	
 
@@ -122,6 +127,13 @@ class Network(object): #later make this inherit brian classes
 		fig = plt.figure()
 		ax = fig.add_subplot(111)
 		cax = ax.imshow(self.v,interpolation='nearest',aspect='auto', cmap=plt.cm.binary)
-		plt.colorbar(cax)
-		plt.tight_layout()
+
+		fig.colorbar(cax)
+		fig.tight_layout()
+
+		fig2 = plt.figure()
+		ax2 = fig2.add_subplot(111)
+		cax2 = ax2.imshow(self.M[:,:,0],interpolation='nearest',aspect='auto',cmap=plt.cm.binary)
+		fig2.colorbar(cax2)
+		fig2.tight_layout()
 		plt.show()

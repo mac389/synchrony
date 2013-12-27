@@ -16,15 +16,10 @@ def accuracy_figure(data,**kwargs):
 
 	target_memory = data['memories'][:,0] #Assume targeting 0th memory
 
-	print '------'
-	print start, start.dot(target_memory)
-	print stop
-	print target_memory
-	print 'zsdxfcvhbjnkmxdfszfxdchvjbknvcgdfgvbhjn'
-
 	accuracy = accuracy_trace(voltage, target_memory)
-	print accuracy[:15]
 	visualization.accuracy_plot(start,accuracy,stop,target_memory,**kwargs)
+
+	return np.average(accuracy[-200:])
 
 def accuracy_trace(voltage,target):
 
@@ -40,6 +35,20 @@ def q_star(voltage,target):
 	#starting out with just the accuracy
 	return accuracy.max()
 
+def sensitivity(x,y, show=False, savename=None):
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+	ax.plot(x,y,'k',linewidth=2)
+
+	artist.adjust_spines(ax)
+	ax.set_xlabel(r'\Large \textbf{Mixing fraction,} $\; \alpha$')
+	ax.set_ylabel(r'\Large textbf{Maximum accuracy,}$\; q_{\max}$')
+	plt.tight_layout()
+	if savename:
+		plt.savefig('%s.png'%savename,dpi=300)
+
+	if show:
+		plt.show()
 
 def correlation_visualization(data, show=False,savename=None):
 	correlations = ['Quu','Qru','Qvu']

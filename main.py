@@ -10,7 +10,7 @@ ru['idem'] = {'means':np.array([0,0]),
 			  'covariances': np.ones((2,2))}
 
 mixing_fractions = np.linspace(0,1,num=3)
-simulation = Network(duration=1000,downsampling=1, ru_correl_matrix=ru['idem'], mixing_fraction=[0.])
+simulation = Network(duration=1000,downsampling=1, ru_correl_matrix=ru['idem'], mixing_fraction=mixing_fractions)
 
 
 
@@ -20,12 +20,15 @@ simulation = Network(duration=1000,downsampling=1, ru_correl_matrix=ru['idem'], 
 active_directory = simulation.basedir
 
 results = [filename for filename in os.listdir(active_directory) if 'results' in filename]
+asymp_accuracy = np.zeros(size=mixing_fractions.shape)
+for i,(results_filename,fraction) in enumerate(zip(results,mixing_fractions)):
+	print os.path.join(active_directory,results_filename)
+	data = postdoc.load_data(os.path.join(active_directory,results_filename))
+	asymp_accuracy[i] = postdoc.accuracy_figure(data,savename=os.path.join(active_directory,'accuracy-%s')%str(int(fraction*10)))
+	postdoc.correlation_visualization(data,savename =os.path.join(active_directory,'correlations-%s')%str(int(fraction*10)))
 
-for results_filename,fraction in zip(results,mixing_fractions):
-	data = postdoc.load_data(simulation.writename)
-	path,_ = os.path.split(simulation.writename)
-	postdoc.accuracy_figure(data,savename=os.path.join(path,'accuracy-%s')%str(int(fraction*10)))
-	postdoc.correlation_visualization(data,savename =os.path.join(path,'correlations-%s')%str(int(fraction*10)))
+postdoc.sensitivity(mixing_fractions,asymp_accuracy, savename = os.path.join(active_directory,'sensitivity'))
+
 
 '''
 	TODO: 
