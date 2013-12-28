@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 
 from datetime import datetime
 from time import time
+from scipy import signal
 
 READ = 'rb'
 WRITE = 'wb'
@@ -46,13 +47,46 @@ class Network(object): #later make this inherit brian classes
 	def Fs(self,scalar):
 		return -scalar if random.random() < 1/(1+np.exp(-scalar)) else scalar
 
+
+	def gauss(other,n=200,sigma=50):
+		xs = range(-int(n/2),int(n/2)+1)
+		kern = np.array([1/(sigma*np.sqrt(2*np.pi))*np.exp(-float(x)**2/(2*sigma**2)) for x in xs])
+		return kern
+
+	def loggauss(other,n=200,sigma=.5):
+		xs = np.linspace(0.001,3,num=n+1)
+		kern = np.array([1/(x*sigma*np.sqrt(2*np.pi))*np.exp(-np.log(float(x))**2/(2*sigma**2)) for x in xs])
+		return kern/30.
+
+
 	def initialize(self, ru_params, mixing_fraction):
 	
-		#**kwargs will clean this
+		t = np.array(range(self.duration))
+
 		#These functions are getting spaghetti-like
+		self.ugen = {}
+		self.ugen['frequency'] = 0.01 # Hz
+		self.ugen['fill'] = -1
+		self.ugen['buffer'] = 10
+		self.ugen['chronic'] = lambda timepoints: signal.square(2*np.pi*self.ugen['frequency']*timepoints)
+		self.ugen['exposure'] = lambda timepoints: np.lib.pad(self.ugen['chronic'](t)[:int(1/self.ugen['frequency'])],
+													  (u['buffer'],len(timepoints)-int(1/self.ugen['frequency']+self.ugen['buffer'])),
+													  'constant',constant_values=(self.ugen['fill'],self.ugen['fill']))
+		self.ugen['cessation'] = lambda timepoints: np.lib.pad(self.ugen['chronic'](t)[:5*int(1/self.ugen['frequency'])],
+													  (self.ugen['buffer'],len(timepoints)-5*int(1/self.ugen['frequency']+self.ugen['buffer'])),
+													  'constant',constant_values=(self.ugen['fill'],self.ugen['fill']))
+
+		self.rgen = {}
+		self.rgen['susceptible'] = self.loggauss()
+		self.rgen['resilient'] = self.gauss()
 
 		self.v = np.zeros((self.N['neurons'],self.duration),dtype=np.float16)
-		self.u = np.zeros_like(self.v,dtype=np.float16)
+
+		#NEXT ABSTRACT OVER SCHEMES
+		self.u = np.tile(self.ugen['chronic'](t),(self.N['neurons'],1))
+
+
+		#self.u = np.zeros_like(self.v,dtype=np.float16)
 		self.r = np.zeros_like(self.v,dtype=np.float16)
 
 		self.M = np.zeros((self.N['neurons'],self.N['neurons'],self.duration),dtype=np.float16)
@@ -62,10 +96,6 @@ class Network(object): #later make this inherit brian classes
 		self.Qru = np.zeros_like(self.Quu,dtype=np.float16)
 		self.Qvu = np.zeros_like(self.Quu,dtype=np.float16)
 
-		#r = arrs[:,:,0]
-		#u = arrs[:,:,1]
-
-
 		self.M[:,:,0] = np.array([np.outer(one,one) for one in self.memories.T]).sum(axis=0)
 		self.M[:,:,0][np.diag_indices(self.N['neurons'])] = 0
 
@@ -73,10 +103,6 @@ class Network(object): #later make this inherit brian classes
 							 mixing_fraction*(2*(np.random.random_integers(0,high=1,size=(self.N['neurons'],)))-1))
 
 		self.W[:,:,0] = np.random.random_sample(size=(self.N['neurons'],self.N['neurons'])) #Assume same number of inputs for now
-
-
-		#self.u[:,400:600] = np.tile(self.memories[:,0],(200,1)).transpose()
-		#self.r[:,400:600] = np.ones((self.N['neurons'],200))
 
 		self.I = np.eye(self.N['neurons'])
 

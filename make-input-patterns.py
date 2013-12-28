@@ -1,7 +1,26 @@
+import cPickle
+
 import numpy as np
 import matplotlib.pyplot as plt
+import Graphics as artist
 
-from scipy import signal
+from scipy import signal, ndimage
+from matplotlib import rcParams
+
+rcParams['text.usetex'] = True
+
+
+def gauss(n=200,sigma=50):
+	xs = range(-int(n/2),int(n/2)+1)
+	kern = np.array([1/(sigma*np.sqrt(2*np.pi))*np.exp(-float(x)**2/(2*sigma**2)) for x in xs])
+	return kern
+
+def loggauss(n=200,sigma=.5):
+	xs = np.linspace(0.001,3,num=n+1)
+	kern = np.array([1/(x*sigma*np.sqrt(2*np.pi))*np.exp(-np.log(float(x))**2/(2*sigma**2)) for x in xs])
+	return kern/30.
+
+
 
 u = {}
 u['frequency'] = 0.01 # Hz
@@ -11,17 +30,54 @@ u['chronic'] = lambda timepoints: signal.square(2*np.pi*u['frequency']*timepoint
 u['exposure'] = lambda timepoints: np.lib.pad(u['chronic'](t)[:int(1/u['frequency'])],
 											  (u['buffer'],len(timepoints)-int(1/u['frequency']+u['buffer'])),
 											  'constant',constant_values=(u['fill'],u['fill']))
-u['cessation'] = 
+u['cessation'] = lambda timepoints: np.lib.pad(u['chronic'](t)[:5*int(1/u['frequency'])],
+											  (u['buffer'],len(timepoints)-5*int(1/u['frequency']+u['buffer'])),
+											  'constant',constant_values=(u['fill'],u['fill']))
 
+r = {}
+r['susceptible'] = loggauss()
+r['resilient'] = gauss()
+
+#cPickle.dump({'r':r,'u':u},open('ru.pkl','wb'))
 t = np.linspace(0,1000,num=1001)
+'''
+fig,axs = plt.subplots(nrows=2,ncols=3)
+for j,(r_schema,row) in enumerate(zip(['susceptible','resilient'],axs)):
+	for i,(u_schema, col) in enumerate(zip(['exposure','chronic','cessation'],row)):
+		col.plot(np.convolve(u[u_schema](t),r[r_schema]),'k',linewidth=2)
+		artist.adjust_spines(col)
 
-buff = 10
-pulse = u['chronic'](t)[:int(1/u['frequency'])]
-fill = min(pulse)
-pulse = np.lib.pad(pulse,(buff,len(t)-(len(pulse)+buff)),'constant',constant_values=(fill,fill))
+		if i ==0:
+			col.set_ylabel(artist.format(r_schema.capitalize()))
 
-fig = plt.figure()
-ax = fig.add_subplot(111)
-ax.plot(u['exposure'](t),'k',linewidth=2)
-ax.set_ylim((-1.5,1.5))
+		if j ==1:
+			col.set_xlabel(artist.format(u_schema.capitalize()))
+		col.set_xticklabels([])
+'''
+'''
+fig,axs = plt.subplots(ncols=2,nrows=1)
+for scheme,ax in zip(['susceptible','resilient'],axs):
+	ax.plot(r[scheme],'k',linewidth=2)
+	artist.adjust_spines(ax)
+
+	ax.set_xticklabels([])
+	ax.set_xticks([])
+
+
+	ax.annotate(artist.format(scheme.capitalize()), xy=(.8, .5),  xycoords='axes fraction',
+                horizontalalignment='center', verticalalignment='center')
+'''
+'''
+fig,axs = plt.subplots(nrows=3,ncols=1)
+for scheme,ax in zip(['exposure','chronic','cessation'],axs):
+	ax.plot(u[scheme](t),'k',linewidth=2)
+	artist.adjust_spines(ax)
+
+	ax.set_xlabel(r'\Large \textbf{%s, Time}'%scheme.capitalize())
+	ax.set_yticks([-1,1])
+	ax.set_ylim((-1.5,1.5))
+	ax.set_yticklabels(map(artist.format,['not using','using']))
+	ax.set_xticklabels([])
+'''
+fig.tight_layout()
 plt.show()
