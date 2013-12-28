@@ -11,13 +11,13 @@ r_schema = ['susceptible','resilient']
 u_schema = ['exposure','chronic','cessation']
 
 
-mixing_fractions = np.linspace(0,1,num=3)
+mixing_fractions = np.linspace(0,1,num=11)
 for reward in r_schema:
     for stimulus in u_schema:
         moniker = '%s-%s'%(reward,stimulus)
         print moniker
         print ''
-        simulation = Network(N=N,duration=1000,downsampling=1, mixing_fraction=mixing_fractions,r_schema=reward,u_schema=stimulus)
+        simulation = Network(N=N,duration=2500,downsampling=1, mixing_fraction=mixing_fractions,r_schema=reward,u_schema=stimulus)
 
         active_directory = simulation.basedir
         results = [filename for filename in os.listdir(active_directory) if 'results' in filename]
@@ -28,9 +28,9 @@ for reward in r_schema:
             accuracy[i,:] = postdoc.accuracy_figure(data,savename=os.path.join(active_directory,'accuracy-%s-%s')%(str(int(fraction*10)),moniker))
             # energies[i,:] = postdoc.energy_figure(data,savename=os.path.join(active_directory,'energy-%s')%str(int(fraction*10)))
             #postdoc.correlation_visualization(data,savename =os.path.join(active_directory,'correlations-%s')%str(int(fraction*10)))
-            visualization.track_matrices(data['M'],savename=os.path.join(active_directory,'M-change-%s-%s')%(str(int(fraction*10)),moniker))
-            visualization.memory_stability(data['memory_stability'],savename=os.path.join(active_directory,'M-stability-%s-%s')%(str(int(fraction*10)),moniker))
-            visualization.network_stability(data['network_stability'],savename=os.path.join(active_directory,'network-stability-%s-%s')%(str(int(fraction*10)),moniker))
+            visualization.track_matrices(data['M'],savename=os.path.join(active_directory,'M-change-%s')%(str(int(fraction*10)),moniker))
+            visualization.memory_stability(data['memory_stability'],savename=os.path.join(active_directory,'M-stability-%s')%(str(int(fraction*10)),moniker))
+            visualization.network_stability(data['network_stability'],savename=os.path.join(active_directory,'network-stability-%s')%(str(int(fraction*10)),moniker))
             #Don't forget about this.
         correl = postdoc.sensitivities(mixing_fractions,accuracy.transpose(), savename = os.path.join(active_directory,'sensitivities-%s'%moniker))
         #Transpose so that the x-axis contains mixing fraction and y-axis accuracy
