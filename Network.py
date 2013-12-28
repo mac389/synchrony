@@ -17,8 +17,8 @@ class Network(object): #later make this inherit brian classes
  		self.N = N if N else  {'neurons':100,'memories':10}
 		self.duration = duration
 		self.mixing_fraction = mixing_fraction
-		self.r_schmema = r_schema if r_schema else ['susceptible']
-		self.u_schema = u_schema if u_schema else ['chronic']
+		self.r_schema = r_schema if r_schema else 'susceptible'
+		self.u_schema = u_schema if u_schema else 'chronic'
 
 		self.mixing_fraction = mixing_fraction if mixing_fraction is np.ndarray or list else list(mixing_fraction)
 		
@@ -27,14 +27,14 @@ class Network(object): #later make this inherit brian classes
 		self.memories = cPickle.load(open(memories,READ)) if memories \
 					else 2*np.random.random_integers(0,high=1,size=(self.N['neurons'],self.N['memories']))-1
 
+
 		for fraction in self.mixing_fraction:
-			self.initialize(ru_params = ru_correl_matrix, mixing_fraction = fraction)
+			self.initialize(reward = self.r_schema,stimulus=self.u_schema, mixing_fraction = fraction)
 			self.run()
 			#self.quick_view()
-			self.save(downsample = downsampling, suffix = str(int(fraction*10)), basename = self.basename)
+			self.save(downsample = downsampling, suffix = '%s-%s-%s'%(str(int(fraction*10)),self.r_schema,self.u_schema), basename = self.basename)
 
-	#Everything belongs to self, don't need to pass so many arguments!
-
+		#Everything belongs to self, don't need to pass so many arguments!
 
 	def F(self,vector):
 		answer = vector.copy()
@@ -59,7 +59,7 @@ class Network(object): #later make this inherit brian classes
 		return kern/30.
 
 
-	def initialize(self, ru_params, mixing_fraction):
+	def initialize(self, reward, stimulus, mixing_fraction):
 	
 		t = np.array(range(self.duration))
 
@@ -70,10 +70,10 @@ class Network(object): #later make this inherit brian classes
 		self.ugen['buffer'] = 10
 		self.ugen['chronic'] = lambda timepoints: signal.square(2*np.pi*self.ugen['frequency']*timepoints)
 		self.ugen['exposure'] = lambda timepoints: np.lib.pad(self.ugen['chronic'](t)[:int(1/self.ugen['frequency'])],
-													  (u['buffer'],len(timepoints)-int(1/self.ugen['frequency']+self.ugen['buffer'])),
+													  (self.ugen['buffer'],len(timepoints)-int(1/self.ugen['frequency']+self.ugen['buffer'])),
 													  'constant',constant_values=(self.ugen['fill'],self.ugen['fill']))
 		self.ugen['cessation'] = lambda timepoints: np.lib.pad(self.ugen['chronic'](t)[:5*int(1/self.ugen['frequency'])],
-													  (self.ugen['buffer'],len(timepoints)-5*int(1/self.ugen['frequency']+self.ugen['buffer'])),
+													  (self.ugen['buffer'],self.duration-(5*int(1/self.ugen['frequency'])+self.ugen['buffer'])),
 													  'constant',constant_values=(self.ugen['fill'],self.ugen['fill']))
 
 		self.rgen = {}
@@ -82,10 +82,12 @@ class Network(object): #later make this inherit brian classes
 
 		self.v = np.zeros((self.N['neurons'],self.duration),dtype=np.float16)
 
-		#NEXT ABSTRACT OVER SCHEMES
-		self.u = self.ugen['chronic'](t)
+		print stimulus
+		print reward
+		print ''
+		self.u = self.ugen[stimulus](t)
 #		self.r = np.convolve(self.u[u_schema](t),self.r[r_schema]) Hint for ABSTRACTING
-		self.r = np.convolve(self.ugen['chronic'](t),self.rgen['susceptible'])
+		self.r = np.convolve(self.ugen[stimulus](t),self.rgen[reward])
 
 		self.M = np.zeros((self.N['neurons'],self.N['neurons'],self.duration),dtype=np.float16)
 		self.W = np.zeros_like(self.M,dtype=np.float16)
