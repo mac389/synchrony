@@ -64,6 +64,16 @@ def memory_stability(mat,savename):
 	cbar.set_label(artist.format('Energy'))
 	plt.savefig('%s.png'%savename,dpi=200)
 
+def network_stability(energy_trace,savename):
+
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+	ax.plot(energy_trace,'k',linewidth=2)
+	artist.adjust_spines(ax)
+	ax.set_xlabel(artist.format('Time'))
+	ax.set_ylabel(artist.format('Stability (energy)'))
+
+	plt.savefig('%s.png'%savename,dpi=200)
 
 def track_matrices(mat,savename):
 	#Assume its a 3d matrix
