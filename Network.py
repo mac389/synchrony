@@ -28,11 +28,15 @@ class Network(object): #later make this inherit brian classes
 
 		for fraction in self.mixing_fraction:
 			self.initialize(ru_params = ru_correl_matrix, mixing_fraction = fraction)
+			self.mamory_stability()
 			self.run()
 			#self.quick_view()
 			self.save(downsample = downsampling, suffix = str(int(fraction*10)), basename = self.basename)
 
 	#Everything belongs to self, don't need to pass so many arguments!
+
+	def memory_stability(self):
+		pass
 
 	def F(self,vector):
 		answer = vector.copy()
