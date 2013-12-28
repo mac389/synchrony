@@ -76,9 +76,8 @@ def track_matrices(mat,savename):
 		this_idx = np.argsort(these_values)[::-1]
 		these_vectors = these_vectors[this_idx][:10]
 
-		data[:,t] = [a.dot(b.T) for a,b in zip(base_vectors,these_vectors)]
-		data[:,t] /= (base_norm*np.linalg.norm(these_vectors))
-
+		data[:,t] = [a.dot(b.T)/(np.linalg.norm(a)*np.linalg.norm(b)) for a,b in zip(base_vectors,these_vectors)]
+		#Scale by eigenvalues?
 	fig = plt.figure()
 	ax = fig.add_subplot(111)
 	cax= ax.imshow(data,interpolation='nearest',aspect='auto')
@@ -87,7 +86,8 @@ def track_matrices(mat,savename):
 	ax.set_yticks(range(10))
 	ax.set_yticklabels([r'\Large $\mathbf{e_%d\left(0\right) \cdot e_%d}$'%(x,x) for x in range(10)])
 
-	ax.set_xticklabels([10*x for x in range(data.shape[1])])
+	ax.set_xticks(range(mat.shape[2])[::10])
+	ax.set_xticklabels([10*x for x in range(mat.shape[2])[::10]])
 
 	plt.colorbar(cax)
 	fig.tight_layout()

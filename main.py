@@ -16,12 +16,12 @@ simulation = Network(N=N,duration=1000,downsampling=1,
 active_directory = simulation.basedir
 results = [filename for filename in os.listdir(active_directory) if 'results' in filename]
 accuracy = np.zeros((len(mixing_fractions),N['memories']))
-energies = np.zeros((len(mixing_fractions,N['memories'])))
+energies = np.zeros((len(mixing_fractions),N['memories']))
 
 for i,(results_filename,fraction) in enumerate(zip(results,mixing_fractions)):
 	data = postdoc.load_data(os.path.join(active_directory,results_filename))
 	accuracy[i,:] = postdoc.accuracy_figure(data,savename=os.path.join(active_directory,'accuracy-%s')%str(int(fraction*10)))
-	energies[i,:] = postdoc.energy_figure(data,savename=os.path.join(active_directory,'energy-%s')%str(int(fraction*10)))
+	# energies[i,:] = postdoc.energy_figure(data,savename=os.path.join(active_directory,'energy-%s')%str(int(fraction*10)))
 	#postdoc.correlation_visualization(data,savename =os.path.join(active_directory,'correlations-%s')%str(int(fraction*10)))
 	visualization.track_matrices(data['M'],savename=os.path.join(active_directory,'M-change-%s')%str(int(fraction*10)))
 	#Don't forget about this.
@@ -54,5 +54,6 @@ correl = postdoc.sensitivities(mixing_fractions,accuracy.transpose(), savename =
 				 		"Cessation" (truncated series of pulses)
 
 	 4. Time series of correlations 
-	 5.  
+	 5. Plot of asymptotic network stability (E(v_inf)) for different values of Qru. 
+	 6. Time series of M,W tracking changes in the matrix   
 '''

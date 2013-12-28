@@ -28,7 +28,6 @@ class Network(object): #later make this inherit brian classes
 
 		for fraction in self.mixing_fraction:
 			self.initialize(ru_params = ru_correl_matrix, mixing_fraction = fraction)
-			self.memory_stability()
 			self.run()
 			#self.quick_view()
 			self.save(downsample = downsampling, suffix = str(int(fraction*10)), basename = self.basename)
@@ -62,9 +61,6 @@ class Network(object): #later make this inherit brian classes
 		self.Quu = np.zeros((self.N['neurons'],self.N['neurons'],self.duration),dtype=np.float16)
 		self.Qru = np.zeros_like(self.Quu,dtype=np.float16)
 		self.Qvu = np.zeros_like(self.Quu,dtype=np.float16)
-
-		arrs = np.random.multivariate_normal(ru_params['means'],ru_params['covariances'],
-			size=(self.N['neurons'],self.duration)).astype(np.float16)
 
 		#r = arrs[:,:,0]
 		#u = arrs[:,:,1]
