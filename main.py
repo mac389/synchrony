@@ -41,3 +41,18 @@ correl = postdoc.sensitivities(mixing_fractions,accuracy.transpose(), savename =
 
 		4. Abstract so can run with different r,u combinations; analyze qvu | quu
 '''
+
+'''
+	Figures:
+
+	 1. Heat map of the maximum accuracy (q) the network can obtain for each memory (row) as a function of interference (column).
+	 2. Heat map of the maximum accruacy (q) the network can obtain for each memory (row) as a function of stimulus-reward correlation (column).
+	 3. Heat map of the stability (energy) of each memory (row) as a function of stimulus-reward correlation (column).
+	 		--Three schemes of stimulus-reward correlation: 
+				 		"Exposure" (a pulse)
+				 		"Continued use" (series of pulses), 
+				 		"Cessation" (truncated series of pulses)
+
+	 4. Time series of correlations 
+	 5.  
+'''

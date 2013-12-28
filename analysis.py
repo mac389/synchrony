@@ -37,7 +37,10 @@ def sensitivities(x,im,show=False, savename=None):
 
 	artist.adjust_spines(ax)
 	ax.set_xticks(range(len(x)))
-	ax.set_xticklabels([r'\Large $\mathbf{%.02f}$'%alpha for alpha in map(sn,x)])
+	xlabs = [r'\Large $\mathbf{%.02f}$'%alpha for alpha in map(sn,x)]
+	xlabs[0] = r'\Large $\mathrm{All signal}$'
+	xlabs[-1] = r'\Large $\mathrm{All noise}$'
+	ax.set_xticklabels(xlabs)
 	ax.set_xlabel(r'\Large $\mathrm{\frac{Signal}{Noise}}$')
 	ax.set_ylabel(r'\Large $\mathrm{Pattern} $', rotation='horizontal')
 	cbar.set_label(r'\Large $\mathrm{Accuracy,} \; q_{\max}$')
