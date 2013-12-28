@@ -50,6 +50,21 @@ def accuracy_plot(start,accuracy, stop, memory,idx=0,savename=''):
 
 dq = lambda data: map(np.linalg.det,np.rollaxis(data.astype(np.float32),2))
 
+def memory_stability(mat,savename):
+
+	fig = plt.figure()
+	ax = fig.add_subplot(111)
+	cax = ax.imshow(mat,interpolation='nearest',aspect='auto')
+	
+	artist.adjust_spines(ax)
+	ax.set_ylabel(artist.format('Memory'))
+	ax.set_xlabel(artist.format('Time'))
+
+	cbar = plt.colorbar(cax)
+	cbar.set_label(artist.format('Energy'))
+	plt.savefig('%s.png'%savename,dpi=200)
+
+
 def track_matrices(mat,savename):
 	#Assume its a 3d matrix
 

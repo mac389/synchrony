@@ -70,6 +70,8 @@ def sensitivity(x,y, show=False, savename=None):
 
 	return pearsonr(x,y)
 
+dq = lambda data: abs(np.diff(map(abs,map(np.linalg.det,np.rollaxis(data.astype(np.float32),2)))))
+
 def correlation_visualization(data, show=False,savename=None):
 	correlations = ['Quu','Qru','Qvu']
 	#Analyze correlations

@@ -22,11 +22,10 @@ for i,(results_filename,fraction) in enumerate(zip(results,mixing_fractions)):
 	data = postdoc.load_data(os.path.join(active_directory,results_filename))
 	accuracy[i,:] = postdoc.accuracy_figure(data,savename=os.path.join(active_directory,'accuracy-%s')%str(int(fraction*10)))
 	# energies[i,:] = postdoc.energy_figure(data,savename=os.path.join(active_directory,'energy-%s')%str(int(fraction*10)))
-	#postdoc.correlation_visualization(data,savename =os.path.join(active_directory,'correlations-%s')%str(int(fraction*10)))
+	postdoc.correlation_visualization(data,savename =os.path.join(active_directory,'correlations-%s')%str(int(fraction*10)))
 	visualization.track_matrices(data['M'],savename=os.path.join(active_directory,'M-change-%s')%str(int(fraction*10)))
+	visualization.memory_stability(data['memory_stability'],savename=os.path.join(active_directory,'M-stability-%s')%str(int(fraction*10)))
 	#Don't forget about this.
-
-
 correl = postdoc.sensitivities(mixing_fractions,accuracy.transpose(), savename = os.path.join(active_directory,'sensitivities'))
 #Transpose so that the x-axis contains mixing fraction and y-axis accuracy
 #print correl
