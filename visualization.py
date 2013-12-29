@@ -6,10 +6,7 @@ from matplotlib import rcParams
 
 rcParams['text.usetex'] = True
 
-'''
-	I'm missing something with passing **kwargs between modules. It caused the accuracy graphs to have errors in them. 
-	So, I'm assuming arguments are passed in a specific way.
-'''
+
 def accuracy_plot(start,accuracy, stop, memory,idx=0,savename=''):
 
 	fig = plt.figure()
@@ -76,14 +73,7 @@ def network_stability(energy_trace,savename):
 	plt.savefig('%s.png'%savename,dpi=200)
 
 def track_matrices(mat,savename):
-	#Assume its a 3d matrix
 
-	'''
-	data = dq(mat)
-	fig = plt.figure()
-	ax = fig.add_subplot(111)
-	ax.plot(data,'k',linewidth=2)
-	'''
 	mat = mat.astype(np.float32)
 	base = mat[:,:,0]
 
@@ -93,10 +83,10 @@ def track_matrices(mat,savename):
 
 	base_vectors = base_vectors[idx][:10] #Now eigvectors are in descending order, display top 10
 	base_norm = np.linalg.norm(base_vectors)
-	DURATION = base.shape[1]
+	DURATION = mat.shape[2]
 	#Awful magic constant of 10 eigenvectors
 	data = np.zeros((10,DURATION))
-	for t in range(1,mat.shape[2]):
+	for t in range(1,DURATION):
 		these_values,these_vectors = np.linalg.eig(mat[:,:,t])
 		this_idx = np.argsort(these_values)[::-1]
 		these_vectors = these_vectors[this_idx][:10]

@@ -4,20 +4,22 @@ import os, visualization
 import numpy as np
 
 
-N = {'memories':10,'neurons':100}
+N = {'memories':10,'neurons':1000}
 ru = {}
 
 r_schema = ['susceptible','resilient']
 u_schema = ['exposure','chronic','cessation']
 
 
-mixing_fractions = np.linspace(0,1,num=3)
+basedir=None
+mixing_fractions = np.linspace(0,1,num=20)
 for reward in r_schema:
     for stimulus in u_schema:
         moniker = '%s-%s'%(reward,stimulus)
         print moniker
         print ''
-        simulation = Network(N=N,duration=100000,downsampling=1, mixing_fraction=mixing_fractions,r_schema=reward,u_schema=stimulus)
+        simulation = Network(N=N,duration=5000,downsampling=1, mixing_fraction=mixing_fractions,r_schema=reward,u_schema=stimulus,
+            basename=basedir)
 
         active_directory = simulation.basedir
         results = [filename for filename in os.listdir(active_directory) if 'results' in filename]
@@ -35,6 +37,7 @@ for reward in r_schema:
         correl = postdoc.sensitivities(mixing_fractions,accuracy.transpose(), savename = os.path.join(active_directory,'sensitivities-%s'%moniker))
         #Transpose so that the x-axis contains mixing fraction and y-axis accuracy
         #print correl
+        basedir = simulation.basedir
 del simulation
 
 '''

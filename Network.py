@@ -13,7 +13,7 @@ WRITE = 'wb'
 class Network(object): #later make this inherit brian classes
 
 	def __init__(self,N=None,M=None,W=None, duration=1000, memories=None,downsampling=10, mixing_fraction=0,
-					r_schema=None,u_schema=None): #consider **kwargs
+					r_schema=None,u_schema=None,basename=None): #consider **kwargs
  		self.N = N if N else  {'neurons':100,'memories':10}
 		self.duration = duration
 		self.mixing_fraction = mixing_fraction
@@ -22,8 +22,7 @@ class Network(object): #later make this inherit brian classes
 
 		self.mixing_fraction = mixing_fraction if mixing_fraction is np.ndarray or list else list(mixing_fraction)
 		
-		x = self.timestamp()
-		self.basename = x
+		self.basename = basename if basename else self.timestamp()
 
 		self.memories = cPickle.load(open(memories,READ)) if memories \
 					else 2*np.random.random_integers(0,high=1,size=(self.N['neurons'],self.N['memories']))-1
@@ -106,22 +105,26 @@ class Network(object): #later make this inherit brian classes
 
 		self.I = np.eye(self.N['neurons'])
 
-		self.epsilon = 0.001 #ratio of membrane time constant to timestep
+		self.epsilon = 0.0001 #ratio of membrane time constant to timestep
 
 		self.chosen_ones = [random.choice(xrange(self.N['neurons'])) for _ in xrange(1,self.duration)]
 
 	def run(self):
 		for t,idx in zip(range(1,self.duration),self.chosen_ones):
 			
-			self.K = np.linalg.inv(self.I-self.M[:,:,t-1])
+			try:
+				self.K = np.linalg.inv(self.I-self.M[:,:,t-1])
+			except np.linalg.linalg.LinAlgError:
+				self.K = np.zeros_like(self.M[:,:,t-1])
 
 			self.v[:,t] = self.v[:,t-1]
 			self.M[:,:,t] = self.M[:,:,t-1]
 
-			self.v[idx,t] =  1 if self.M[idx,:,t].dot(self.v[:,t]) >=0 else -1
 
-			self.M[:,:,t] = self.M[:,:,t-1] + self.epsilon/10*(self.I-self.M[:,:,t-1] - self.W[:,:,t-1].dot(self.v[:,t])*self.u[t])
-			self.W[:,:,t] = self.W[:,:,t-1] + self.epsilon/100.*(self.u[t]*self.K.dot(self.W[:,:,t-1]).dot(self.r[t]-self.v[:,t]))
+			self.v[idx,t] =  1 if (self.M[idx,:,t].dot(self.v[:,t]) + self.W[idx,:,t-1].dot(self.u[t]*np.ones((self.N['neurons'],)))) >=0 else -1
+
+			self.M[:,:,t] = self.M[:,:,t-1] + self.epsilon*(self.I-self.M[:,:,t-1] - self.W[:,:,t-1].dot(self.v[:,t])*self.u[t])
+			self.W[:,:,t] = self.W[:,:,t-1] + self.epsilon*(self.u[t]*self.K.dot(self.W[:,:,t-1]).dot(self.r[t]-self.v[:,t]))
 			self.memory_stability[:,t] = -0.5*np.array([memory.dot(self.M[:,:,t]).dot(memory) + 
 														memory.dot(self.W[:,:,t]).dot(self.u[t]*np.ones(self.N['neurons']))
 														for memory in self.memories.T])
@@ -147,6 +150,12 @@ class Network(object): #later make this inherit brian classes
 
 		with open(self.writename,WRITE) as f:
 			cPickle.dump(self.results,f)
+		
+		for result in self.results:
+			self.writename = os.path.join(self.basedir,'results--%s-%s.pkl'%(result,suffix))
+			with open(self.writename,WRITE) as f:
+				cPickle.dump(result,f)
+
 
 	def quick_view(self):
 		fig = plt.figure()
