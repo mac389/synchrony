@@ -22,7 +22,8 @@ class Network(object): #later make this inherit brian classes
 
 		self.mixing_fraction = mixing_fraction if mixing_fraction is np.ndarray or list else list(mixing_fraction)
 		
-		self.basename = self.timestamp()
+		x = self.timestamp()
+		self.basename = x
 
 		self.memories = cPickle.load(open(memories,READ)) if memories \
 					else 2*np.random.random_integers(0,high=1,size=(self.N['neurons'],self.N['memories']))-1

@@ -17,7 +17,7 @@ for reward in r_schema:
         moniker = '%s-%s'%(reward,stimulus)
         print moniker
         print ''
-        simulation = Network(N=N,duration=1000,downsampling=1, mixing_fraction=mixing_fractions,r_schema=reward,u_schema=stimulus)
+        simulation = Network(N=N,duration=100000,downsampling=1, mixing_fraction=mixing_fractions,r_schema=reward,u_schema=stimulus)
 
         active_directory = simulation.basedir
         results = [filename for filename in os.listdir(active_directory) if 'results' in filename]
