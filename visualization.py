@@ -44,6 +44,7 @@ def accuracy_plot(start,accuracy, stop, memory,idx=0,savename=''):
 	fig.tight_layout()
 
 	plt.savefig('%s-memory-%d.png'%(savename,idx),dpi=200)
+	plt.close()
 
 dq = lambda data: map(np.linalg.det,np.rollaxis(data.astype(np.float32),2))
 
@@ -60,6 +61,7 @@ def memory_stability(mat,savename):
 	cbar = plt.colorbar(cax)
 	cbar.set_label(artist.format('Energy'))
 	plt.savefig('%s.png'%savename,dpi=200)
+	plt.close()
 
 def network_stability(energy_trace,savename):
 
@@ -71,6 +73,7 @@ def network_stability(energy_trace,savename):
 	ax.set_ylabel(artist.format('Stability (energy)'))
 
 	plt.savefig('%s.png'%savename,dpi=200)
+	plt.close()
 
 def track_matrices(mat,savename):
 
@@ -107,3 +110,4 @@ def track_matrices(mat,savename):
 	plt.colorbar(cax)
 	fig.tight_layout()
 	plt.savefig('%s.png'%savename,dpi=200)
+	plt.close()

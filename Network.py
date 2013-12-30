@@ -29,10 +29,11 @@ class Network(object): #later make this inherit brian classes
 
 
 		for fraction in self.mixing_fraction:
+			print '\t\t', fraction, '\t'
 			self.initialize(reward = self.r_schema,stimulus=self.u_schema, mixing_fraction = fraction)
 			self.run()
 			#self.quick_view()
-			self.save(downsample = downsampling, suffix = '%s-%s-%s'%(str(int(fraction*10)),self.r_schema,self.u_schema), basename = self.basename)
+			self.save(downsample = downsampling, suffix = '%s-%s-%s'%(str(int(fraction*100)),self.r_schema,self.u_schema), basename = self.basename)
 
 		#Everything belongs to self, don't need to pass so many arguments!
 
@@ -82,9 +83,6 @@ class Network(object): #later make this inherit brian classes
 
 		self.v = np.zeros((self.N['neurons'],self.duration),dtype=np.float16)
 
-		print stimulus
-		print reward
-		print ''
 		self.u = self.ugen[stimulus](t)
 #		self.r = np.convolve(self.u[u_schema](t),self.r[r_schema]) Hint for ABSTRACTING
 		self.r = np.convolve(self.ugen[stimulus](t),self.rgen[reward])
@@ -146,7 +144,7 @@ class Network(object): #later make this inherit brian classes
 		if not os.path.isdir(self.basedir):
 			os.makedirs(self.basedir)
 
-		self.writename = os.path.join(self.basedir,'results-%s.pkl'%(suffix))
+		self.writename = os.path.join(self.basedir,'all-results-%s.pkl'%(suffix))
 
 		with open(self.writename,WRITE) as f:
 			cPickle.dump(self.results,f)
@@ -154,7 +152,7 @@ class Network(object): #later make this inherit brian classes
 		for result in self.results:
 			self.writename = os.path.join(self.basedir,'results--%s-%s.pkl'%(result,suffix))
 			with open(self.writename,WRITE) as f:
-				cPickle.dump(result,f)
+				cPickle.dump(self.results[result],f)
 
 
 	def quick_view(self):

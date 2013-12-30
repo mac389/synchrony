@@ -50,6 +50,7 @@ def sensitivities(x,im,show=False, savename=None):
 		plt.savefig('%s.png'%savename,dpi=200)
 	if show:
 		plt.show()
+	plt.close()
 	return [pearsonr(row,x) for row in im]
 
 def sensitivity(x,y, show=False, savename=None):
@@ -67,7 +68,7 @@ def sensitivity(x,y, show=False, savename=None):
 		plt.savefig('%s.png'%savename,dpi=300)
 	if show:
 		plt.show()
-
+	plt.close()
 	return pearsonr(x,y)
 
 dq = lambda data: abs(np.diff(map(abs,map(np.linalg.det,np.rollaxis(data.astype(np.float32),2)))))
@@ -90,3 +91,4 @@ def correlation_visualization(data, show=False,savename=None):
 		plt.savefig('%s.png'%savename,dpi=200)
 	if show:
 		plt.show()
+	plt.close()

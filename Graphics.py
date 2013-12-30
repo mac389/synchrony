@@ -10,6 +10,18 @@ rcParams['ytick.direction'] = 'in'
 
 format = lambda label: r'\Large \textbf{%s}'%label
 
+
+def smooth(x,beta=4):
+	""" kaiser window smoothing """
+	window_len=11
+	# extending the data at beginning and at the end
+	# to apply the window at the borders
+	s = np.r_[x[window_len-1:0:-1],x,x[-1:-window_len:-1]]
+	w = np.kaiser(window_len,beta)
+	y = np.convolve(w/w.sum(),s,mode='valid')
+	return y[5:len(y)-5]
+
+
 def angle_plot(one,two=None):
 	if not two:
 		two=one
