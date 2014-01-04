@@ -10,8 +10,8 @@ N = {'memories':10,'neurons':100}
 duration = 5000
 ru = {}
 
-r_schema = ['susceptible']#,'resilient']
-u_schema = ['exposure']#,'chronic','cessation']
+r_schema = ['susceptible','resilient']
+u_schema = ['therapy']#['exposure','chronic','cessation']
 
 
 basedir=None

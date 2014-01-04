@@ -38,6 +38,8 @@ r = {}
 r['susceptible'] = loggauss()
 r['resilient'] = gauss()
 
+u['therapy'] = lambda timepoints: 2*random.randint(1,size=len(timepoints))-1
+r['therapy'] = lambda timepoints: 2*random.randint(1,size=len(timepoints))-1
 #cPickle.dump({'r':r,'u':u},open('ru.pkl','wb'))
 t = np.linspace(0,1000,num=1001)
 '''
@@ -79,5 +81,13 @@ for scheme,ax in zip(['exposure','chronic','cessation'],axs):
 	ax.set_yticklabels(map(artist.format,['not using','using']))
 	ax.set_xticklabels([])
 '''
+'''
+fig,axs = plt.subplots(nrows=3,ncols=2)
+for reward,ax in zip(r,axs):
+	for stimulus,panel in zip(['exposure','chronic','cessation'],ax):
+		panel.xcorr(r[reward],u[stimulus](t),usevlines=True,normed=True,linewidth=2,maxlags=100)
+		panel.axhline(y=0,color='k',linewidth=2)
+
 fig.tight_layout()
 plt.show()
+'''

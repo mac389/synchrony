@@ -45,6 +45,9 @@ for reward,ax in zip(r_schema,axs):
 	artist.adjust_spines(ax)
 	ax.set_xlabel(artist.format('Time'))
 	ax.set_ylabel(r'\Large $E\left(\mathbf{v}\right)$')
+
+
+
 plt.legend(frameon=False)
 plt.tight_layout()
 plt.show()

@@ -42,8 +42,8 @@ def accuracy_plot(start,accuracy, stop, memory,idx=0,savename=''):
 	target_plot.set_xlabel(artist.format('Target'))
 
 	fig.tight_layout()
-
-	plt.savefig('%s-memory-%d.png'%(savename,idx),dpi=200)
+	if savename:
+		plt.savefig('%s-memory-%d.png'%(savename,idx),dpi=200)
 	plt.close()
 
 dq = lambda data: map(np.linalg.det,np.rollaxis(data.astype(np.float32),2))

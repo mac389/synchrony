@@ -22,7 +22,7 @@ def accuracy_figure(data,savename):
 		memory = data['memories'][:,i]
 		accuracy = voltage.transpose().dot(memory)/float(N)	
 		accuracies[i] = accuracy[-200:].mean()
-		visualization.accuracy_plot(start,accuracy,stop,memory,idx=i, savename=savename)
+		visualization.accuracy_plot(start,accuracy,stop,memory,idx=i, savename=None)
 	return accuracies
 
 sn = lambda alpha: (1-alpha)/alpha if alpha > 0 else 0

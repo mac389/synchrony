@@ -41,7 +41,7 @@ The data from this are chosen from a simulation where the initial conditions con
 basedir = '/Volumes/My Book/synchrony-data/2013-12-29-13-26-12'
 
 r_schema = ['susceptible','resilient']
-u_schema = ['exposure','chronic','cessation']
+u_schema = ['exposure','chronic','cessation','therapy']
 
 filename = lambda ru: os.path.join(basedir,'all-results-0-%s-%s.pkl'%(ru[0],ru[1]))
 data = {'%s-%s'%(r,u):cPickle.load(open(filename((r,u)),'rb')) for r in r_schema for u in u_schema}

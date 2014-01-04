@@ -81,11 +81,14 @@ class Network(object): #later make this inherit brian classes
 		self.rgen['susceptible'] = self.loggauss()
 		self.rgen['resilient'] = self.gauss()
 
+		self.ugen['therapy'] = lambda timepoints: 2*np.random.randint(1,size=len(timepoints))-1
+		self.rgen['therapy'] = lambda timepoints: 2*np.random.randint(1,size=len(timepoints))-1
+
 		self.v = np.zeros((self.N['neurons'],self.duration),dtype=np.float16)
 
 		self.u = self.ugen[stimulus](t)
 #		self.r = np.convolve(self.u[u_schema](t),self.r[r_schema]) Hint for ABSTRACTING
-		self.r = np.convolve(self.ugen[stimulus](t),self.rgen[reward])
+		self.r = self.rgen[reward](t) if reward == 'therapy' else np.convolve(self.ugen[stimulus](t),self.rgen[reward]) 
 
 		self.M = np.zeros((self.N['neurons'],self.N['neurons'],self.duration),dtype=np.float16)
 		self.W = np.zeros_like(self.M,dtype=np.float16)
