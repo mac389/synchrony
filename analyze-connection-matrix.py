@@ -41,13 +41,13 @@ def get_peak_shift(correl_function):
 
 
 x = data['susceptible-exposure']['M']
-y = np.array([detrend(row) for sheet in x for row in sheet])
+z = np.array([detrend(row) for sheet in x for row in sheet])
 
 CCF_peaks = {}
-nops = len(data)*len(y)*(len(y)-1)/2
+nops = len(data)*len(z)*(len(z)-1)/2
 bar = Bar("Calculating correlations",max = nops)
 start = time()
-for k,condition in enumerate(data.keys()):
+for k,condition in enumerate(['susceptible-cessation']):#enumerate(data.keys()):
 	y = np.array([detrend(row) for sheet in data[condition]['M'] for row in sheet])
 	heatmap = np.zeros((len(y),len(y)),dtype=np.int8)
 	for i in range(len(y)):
